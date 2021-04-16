@@ -84,14 +84,12 @@ CREATE_REPORT () {
     --header "Accept: ${RF_ACCEPT_CONTENT}" \
     > "$RF_REPORT_FILENAME"
 
-    echo "$RF_ACCEPT_CONTENT"
-    echo "$RF_GENERATE_URL"
-
+    RF_DIFF_ARGS="--new-file  --report-identical-files --strip-trailing-cr --ignore-blank-lines --ignore-trailing-space --ignore-space-change --suppress-blank-empty"
     if [ "$RF_DIFF" = true ];
     then
-        echo "$RF_OLD_REPORT" | diff "$RF_REPORT_FILENAME" - --side-by-side --suppress-common-lines --width=180 --color --strip-trailing-cr --report-identical-files --ignore-all-space
+        echo "$RF_OLD_REPORT" | diff - "$RF_REPORT_FILENAME" --side-by-side --suppress-common-lines --width=180 --color $RF_DIFF_ARGS
     else
-        echo "$RF_OLD_REPORT" | diff "$RF_REPORT_FILENAME" - --brief --report-identical-files --ignore-blank-lines  --strip-trailing-cr
+        echo "$RF_OLD_REPORT" | diff - "$RF_REPORT_FILENAME" --brief $RF_DIFF_ARGS
     fi
     echo -e "\n"
 }
