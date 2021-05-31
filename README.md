@@ -1,20 +1,35 @@
-# Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+# Introduction
+The tool
+ * refreshes an existing report template
+ * creates reports for lists of DOSSIERS, SUBSTANCES, ARTICLES, CATEGORIES, and MIXTURES
 
 # Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
 
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+1. Get a working bash shell, e.g.,https://gitforwindows.org/.
+2. Clone the repository
+3. Copy default.env to, e.g., my.env
+4. Edit the values of the properties in my.env
+5. Run the script in the bash shell
+*  \>  ./refresh-and-generate.sh my.env
+6. Check the report output
 
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
+#  Software dependencies
+The script uses the zip tool, for Windows installations it is included with the package. Non-window installations need to install GNU zip
 
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+# Setting up the script environment
+
+The tool stores the password to IUCLID in plain text, so the script should not be used with a IUCLID server containing confidential data in case the password is stolen.
+
+For example if the user creates a new report template using the web interface, the report will be accessible in the URL
+_http://localhost:8080_/iuclid6-web/reports/PCN%20HTML%20report/_1_ (you can get the URL from the browser address bar)
+The above URL serves us to define the main variables in the env file:
+RF_SERVER=http://localhost:8080
+RF_REPORT_ID=1
+
+# Script options
+
+1. Display differences with previous version of output
+* \>  ./refresh-and-generate.sh my.env --diff
+2. Only create reports, do not refresh the template
+* \>  ./refresh-and-generate.sh my.env --only-generate
+

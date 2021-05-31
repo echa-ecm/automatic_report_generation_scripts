@@ -1,21 +1,20 @@
 #!/bin/bash
 
-######
-# Usage: ./refresh-and-generate.sh env-file
-# Tested with IUCLID6 v5.13.0
-# env-file points to a copy of default.env with a set of settings
-# Tool to refresh a given ($REPORT_ID) template in a $SERVER and to generate reports for a  given list of UUIDs in DOSSIERS, SUBSTANCES, ARTICLES,
-# and MIXTURES
-# IUCLID API expects a zip file that matches structure of https://dev.azure.com/echa-ecm/IUCLID/_git/iuclid6-ext?path=%2Fiuclid6-ext-adapter%2Fsrc%2Ftest%2Fresources%2Feu%2Fecha%2Fiuclid6%2Fext%2Fadapter%2Fcontext%2Freport.zip&_a=contents&version=GBmaster
-# The linked zip file provides a list of possible $WORKING_CONTEXTS
-# Make a copy of default.env and modify the values
-# Runs on git bash https://gitforwindows.org/
-# The program assumes all ftls and stylesheets are in the same $TEMPLATE_PATH
-# You need to create the folders ftl, mainFtl, styles, and output in $TEMP
-# The program expects zip to be in the PATH, ie, copy zip.exe from https://sourceforge.net/projects/gnuwin32/files/zip/3.0/
-# to [gitforbashpath(C:\Users\u18339\AppData\Local\Programs\Git\)]\git\mingw64\bin,
-# also a copy of bzip2.dll is in need in the PATH for zip to work
+CHECK_SERVER_HEALTH () {
+    RF_TEST=$(curl -s --location --request GET http://localhost:8080/iuclid6-ext/api/sys/health)
+    if [[ $RF_TEST == *"\"healthy\":true"* ]];
+    then
+        echo "Connected to $RF_SERVER"
+    else
+        echo "The IUCLID server at $RF_SERVER seems to be down. You need to start the server or define the RF_SERVER variable in your configuration."
+        exit 1
+    fi
+}
 
+CREATE_SCRIPT_FOLDERS () {
+    mkdir -p "$RF_TEMP_PATH/"{ftl,mainFtl,output,styles}
+    mkdir -p "$RF_OUTPUT_PATH"
+}
 
 if [ -z "$1" ];
 then
@@ -32,6 +31,10 @@ fi
 RF_REFRESH_TEMPLATE=true
 RF_RED='\033[0;31m'
 RF_NC='\033[0m' # No Color
+
+CHECK_SERVER_HEALTH
+CREATE_SCRIPT_FOLDERS
+
 
 for arg in "$@"
 do
@@ -74,7 +77,7 @@ JOIN_BY () {
 }
 
 CREATE_REPORT () {
-    RF_REPORT_FILENAME="$RF_TEMP_PATH/$i.$RF_REPORT_EXTENSION"
+    RF_REPORT_FILENAME="$RF_OUTPUT_PATH/$i.$RF_REPORT_EXTENSION"
 
     echo -e "Generating report for ${RF_RED}$i${RF_NC} and storing it in $RF_REPORT_FILENAME"
     RF_OLD_REPORT=$(cat "$RF_REPORT_FILENAME")
@@ -95,18 +98,11 @@ CREATE_REPORT () {
 }
 
 REFRESH_TEMPLATE () {
-    RF_SUBMISSION_TYPES=$(JOIN_BY $RF_SUBMISSION_TYPES)
-    RF_APPLICABLE_ENTITIES=$(JOIN_BY $RF_APPLICABLE_ENTITIES)
+    RF_SUBMISSION_TYPES=$(JOIN_BY ${RF_SUBMISSION_TYPES[@]})
+    RF_APPLICABLE_ENTITIES=$(JOIN_BY ${RF_APPLICABLE_ENTITIES[@]})
     RF_WORKING_CONTEXTS=$RF_SUBMISSION_TYPES$'\r'$RF_APPLICABLE_ENTITIES
     RF_REPORT_ZIP_PATH=$RF_TEMP_PATH/package.zip
 
-
-    # The zip created with bash created directory breaks IUCLID. Create these directories manually using git bash, and not windows file explorer
-    # mkdir temp
-    # mkdir temp/ftl
-    # mkdir temp/mainFtl
-    # mkdir temp/output
-    # mkdir temp/styles
     echo $RF_REPORT_NAME > "$RF_TEMP_PATH/name"
     echo $RF_REPORT_DESC > "$RF_TEMP_PATH/description"
     echo $RF_WORKING_CONTEXTS > "$RF_TEMP_PATH/workingContexts"
@@ -118,10 +114,23 @@ REFRESH_TEMPLATE () {
         cp "$RF_TEMPLATE_PATH/$i" "$RF_TEMP_PATH/ftl"
     done
 
-    cp "$RF_STYLES_PATH/$RF_STYLES.xsl" "$RF_TEMP_PATH/styles"
+    if [ "$RF_STYLES" != "" ];
+    then
+        cp "$RF_STYLES_PATH/$RF_STYLES.xsl" "$RF_TEMP_PATH/styles"
+    fi
 
     rm "$RF_REPORT_ZIP_PATH"
-    (cd "$RF_TEMP_PATH" && zip -r -q "package.zip" ./*)
+
+    # If zip is not in the path we run the one included in the distribution
+    if ! command -v zip &> /dev/null;
+    then
+        RF_PWD=$(pwd)
+        RF_ZIP_COMMAND="$RF_PWD/bin/zip"
+    else
+        RF_ZIP_COMMAND="zip"
+    fi
+    echo $RF_ZIP_COMMAND
+    (cd "$RF_TEMP_PATH" && "$RF_ZIP_COMMAND" -r -q "package.zip" ./*)
 
     RF_REFRESH_URL=$RF_SERVER/iuclid6-ext/api/ext/v1/reports?id=$RF_REPORT_ID
     RF_REPORT_URL=$RF_SERVER/iuclid6-web/reports/$RF_REPORT_NAME/$RF_REPORT_ID
@@ -165,6 +174,14 @@ do
     CREATE_REPORT
 done
 
+for i in "${RF_CATEGORIES[@]}";
+do
+    RF_GENERATE_URL=$RF_SERVER/iuclid6-ext/api/ext/v1/raw/CATEGORY/$i?template=database~$RF_REPORT_ID.$RF_MAIN_FTL
+    CREATE_REPORT
+done
+
+
 rm "$RF_TEMP_PATH/styles/"* >&/dev/null
 rm "$RF_TEMP_PATH/ftl/"* >&/dev/null
 rm "$RF_TEMP_PATH/mainFtl/"* >&/dev/null
+exit
