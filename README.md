@@ -33,3 +33,6 @@ RF_REPORT_ID=1
 2. Only create reports, do not refresh the template
 * \>  ./refresh-and-generate.sh my.env --only-generate
 
+# License
+
+This script is published under GPL 2.0
