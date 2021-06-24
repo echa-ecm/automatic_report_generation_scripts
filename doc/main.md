@@ -10,14 +10,14 @@ For IUCLID users who build FTL report templates, the user interface has two limi
 
 2. After upload, report generation cannot be started from across multiple datasets or dossiers.
 
-The new Bash script connects to the IUCLID API and allows users to quickly run an updated report without re-uploading the report into the IUCLID Report Manager, and supports starting report generation
+The new Bash script connects to the [IUCLID API](https://iuclid6.echa.europa.eu/public-api) and allows users to quickly run an updated report without re-uploading the report into the IUCLID Report Manager, and supports starting report generation
 from multiple datasets and dossiers.
 
 
 ## Requirements
 To use and run the report generator  Bash script, you will need:
 
-- IUCLID 6 installed from version 6.3.1.1 onwards (both Desktop and Server versions can be used)
+- IUCLID 6 installed from version v5.15.0 onwards (both Desktop and Server versions can be used)
 - If using Windows [Git Bash](https://gitforwindows.org/) terminal installed on your local machine
 - If using Linux or Mac you need to install the GNU Zip and GIT utilities into your system and use the provided Terminal application
 - A working FTL report template uploaded into the IUCLID report manager
@@ -147,6 +147,9 @@ Here is an example of the command line when opening the  Bash command line from 
 ./refresh-and-generate.sh pcn_html_report.env --diff
 ```
 
-3. The report(s) will be generated and added to the folder 'generated_reports', e.g.,`C:\Users\<username>\Documents\workspace\automatic_report_generation_scripts\generated_reports` *Note that if you get a error 500 error, this points to an issue with the report FTL template and not the set up of the Git Bash script*.
+3. The report(s) will be generated and added to the folder 'generated_reports', e.g.,`C:\Users\<username>\Documents\workspace\automatic_report_generation_scripts\generated_reports`
+
+*Note that if you get a error __500 error__, this points to an issue with the report FTL template files and not the set up of the Git Bash script*. To find out the cause of the error you should inspect the IUCLID logs files (`server.log` and `iuclid6/error_iuclid6.log`) that are found in the installation directory of IUCLID `<installation_path>\glassfish4\glassfish\domains\domain1\logs`, e.g., `C:\iuclid6\glassfish4\glassfish\domains\domain1\logs`.
+
 
 
