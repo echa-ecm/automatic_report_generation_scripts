@@ -29,9 +29,9 @@ Open your terminal from the folder you want the tool to be installed, e.g., C:\U
 ![Git Bash Here](/doc/img/Git-bash-here.png)
 
 In the terminal type
-&nbsp;&nbsp;```
+```
 git clone https://github.com/Mark-R-R/automatic_report_generation_scripts.git
-           ```
+```
 
 ![Screenshot of Terminal with clone command](/doc/img/git-clone.png)
 
@@ -47,101 +47,106 @@ To do this, **follow these steps:**
 
 1. Replace '<...>' with your own IUCLID Username and Password:
 
-&nbsp;&nbsp;```
+```
 export RF_USERNAME=<SuperUser>
 export RF_PASSWORD=<root>
-           ```
+```
 
 2. Replace '<...>' with your server host name, which can be found in your IUCLID web user interface browser URL:
 
-&nbsp;&nbsp;```
+```
 export RF_SERVER=<http://localhost:8080>
-           ```
+```
 
 3. Replace '<...>' with the report identifier from the report which has been uploaded into the Report Manager. Find the report identifier by going into the uploaded report in the report manager,
 and looking at the last number in the browser URL, e.g.:
 
 ![Report ID from IUCLID URL](/doc/img/2021-06-18_10-49-05.png)
 
-&nbsp;&nbsp;```
+```
 export RF_REPORT_ID=<1>
-           ```
+```
 
 4. Add the UUIDs in '< ... >' of the dossiers you wish to generate the report from, and/or from the raw datasets you wish to generate the report from.
 Currently, you can generate from four different dataset entities:
 
 - Substances / Mixtures / Categories / Articles
 
-&nbsp;&nbsp;```
+```
 export RF_DOSSIERS=(<88798a20-8822-4b13-ab0c-2f716b0e3bd5>)
-           ```
+```
 
 5. Remove the '#' for the entity or entities, the report generation is applicable for. Keep the hash for which the report generation is not applicable for.
 Below, report generation is applicable for 'substances' only:
 
-&nbsp;&nbsp;```
+```
 export RF_APPLICABLE_ENTITIES=(
-    SUBSTANCE
-    # MIXTURE
-    # ARTICLE
-    # CATEGORY
-)
-           ```
+                        SUBSTANCE
+                        # MIXTURE
+                        # ARTICLE
+                        # CATEGORY
+        )
+```
 
 6. Replace '< ... >' with the path to where your FTL report templates are stored (remember that a linux based path should be used)
 
-&nbsp;&nbsp;```
+```
 export RF_TEMPLATE_PATH=<"/c/Users/report_user/Documents/workspace/pcn-web-dossier">
-           ```
+```
 
 7. Replace '< ... >' with the path to where your stylesheet is stored. A stylesheet has an '.xsl' file extension and can be found from the IUCLID Reports webpage
 
-&nbsp;&nbsp;```
+```
 export RF_STYLES_PATH=<"/c/Users/report_user/Documents/workspace/stylesheet">
-           ```
+```
 
 8. Replace '< ... >' with the name of your main FTL report template. Do not include the extension (.ftl)
 
-&nbsp;&nbsp;```
+```
 export RF_MAIN_FTL=<00_pcn_web_report_main>
-           ```
+```
 
 9. Replace '< ... >' with the names of your other FTLs. These are separated by a space and enclosed by paranthesis '()'.
 
-&nbsp;&nbsp;```
+```
 export RF_FTLS=<(macros_common_general.ftl pcn_web_head.ftl pcn_web_utilities.ftl)>
-           ```
+```
 
 10. Add the relevant Working contexts' (aka submission types) which are applicable for your report generation by removing the '#' from the Working Context identifier:
 
-&nbsp;&nbsp;```
-export RF_SUBMISSION_TYPES=( BIOC_ACTIVE_SUBSTANCE_FOR_MIXTURES
-    # EU_PPP_MICRO_ACTIVE_SUBSTANCE
-    # NZ_HSNO_FULL_ASSESS_MIX
+```
+export RF_SUBMISSION_TYPES=(
+        BIOC_ACTIVE_SUBSTANCE_FOR_MIXTURES
+        # EU_PPP_MICRO_ACTIVE_SUBSTANCE
+        # NZ_HSNO_FULL_ASSESS_MIX
 )
-           ```
+```
 ## Run and generate the report
 
 When you have set up your own configuration file, you can now generate a report using the bash terminal.
 
 To do this, **follow these steps:**
 
-1. Open 'GIT Bash here' from the folder where you installed the tool, e.g.,  C:\Users\<username>\Documents\workspace\automatic_report_generation_scripts.
+1. Open 'GIT Bash here' from the folder where you installed the tool, e.g.,  `C:\Users\<username>\Documents\workspace\automatic_report_generation_scripts`.
 
 ![Screenshot of File Explorer with Git Bash Here](/doc/img/run-script.png)
 
 
 2. Add to the command line:
-- './refresh-and-generate.sh'
-- the name of the .env file
-- (optional) '--diff' to run a difference report to the previous generation
+- `./refresh-and-generate.sh`
+- the name of the `.env` file, e.g., `pcn_html_report.env`
+- (optional) `--diff` to run a difference report to the previous generation
 
-&nbsp;``` ./refresh-and-generate.sh <name of .env file> --diff ```
+```
+./refresh-and-generate.sh <name of .env file> --diff
+```
 
 Here is an example of the command line when opening the  Bash command line from the main folder where the .sh script is stored:
 
-&nbsp;```./refresh-and-generate.sh script pcn_html_report.env file --diff ```
+```
+./refresh-and-generate.sh pcn_html_report.env --diff
+```
 
-3. The report(s) will be generated and added to the folder 'generated_reports', e.g.,C:\Users\<username>\Documents\workspace\automatic_report_generation_scripts\generated_reports *Note that if you get a error 500 error, this points to an issue with the report FTL template and not the set up of the Git Bash script*.
+3. The report(s) will be generated and added to the folder 'generated_reports', e.g.,`C:\Users\<username>\Documents\workspace\automatic_report_generation_scripts\generated_reports` *Note that if you get a error 500 error, this points to an issue with the report FTL template and not the set up of the Git Bash script*.
 
 
