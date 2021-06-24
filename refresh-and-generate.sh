@@ -28,6 +28,10 @@ else
     set +o allexport
 fi
 
+RF_PWD=$(pwd)
+RF_TEMP_PATH="$RF_PWD/temp"
+RF_OUTPUT_PATH="$RF_PWD/generated_reports"
+
 RF_REFRESH_TEMPLATE=true
 RF_RED='\033[0;31m'
 RF_NC='\033[0m' # No Color
@@ -77,7 +81,7 @@ JOIN_BY () {
 }
 
 CREATE_REPORT () {
-    RF_REPORT_FILENAME="$RF_OUTPUT_PATH/$i.$RF_REPORT_EXTENSION"
+    RF_REPORT_FILENAME="$RF_OUTPUT_PATH/$RF_REPORT_NAME-$i.$RF_REPORT_EXTENSION"
 
     echo -e "Generating report for ${RF_RED}$i${RF_NC} and storing it in $RF_REPORT_FILENAME"
     RF_OLD_REPORT=$(cat "$RF_REPORT_FILENAME")
@@ -124,7 +128,6 @@ REFRESH_TEMPLATE () {
     # If zip is not in the path we run the one included in the distribution
     if ! command -v zip &> /dev/null;
     then
-        RF_PWD=$(pwd)
         RF_ZIP_COMMAND="$RF_PWD/bin/zip"
     else
         RF_ZIP_COMMAND="zip"
