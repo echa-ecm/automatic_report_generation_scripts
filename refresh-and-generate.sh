@@ -184,7 +184,7 @@ do
 done
 
 
-rm "$RF_TEMP_PATH/styles/"* >&/dev/null
-rm "$RF_TEMP_PATH/ftl/"* >&/dev/null
-rm "$RF_TEMP_PATH/mainFtl/"* >&/dev/null
+rm "$RF_TEMP_PATH/styles/"*
+rm "$RF_TEMP_PATH/ftl/"*
+rm "$RF_TEMP_PATH/mainFtl/"*
 exit
