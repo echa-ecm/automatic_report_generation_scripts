@@ -1,7 +1,7 @@
 #!/bin/bash
 
 CHECK_SERVER_HEALTH () {
-    RF_TEST=$(curl -s --location --request GET http://localhost:8080/iuclid6-ext/api/sys/health)
+    RF_TEST=$(curl -s --location --request GET $RF_SERVER/iuclid6-ext/api/sys/health)
     if [[ $RF_TEST == *"\"healthy\":true"* ]];
     then
         echo "Connected to $RF_SERVER"
