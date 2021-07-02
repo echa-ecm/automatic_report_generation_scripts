@@ -10,7 +10,7 @@ For IUCLID users who build FTL report templates, the user interface has two limi
 
 2. After upload, report generation cannot be started from across multiple datasets or dossiers.
 
-The new Bash script connects to the [IUCLID API](https://iuclid6.echa.europa.eu/public-api) and allows users to quickly run an updated report without re-uploading the report into the IUCLID Report Manager, and supports starting report generation
+The new Bash script connects to the [IUCLID API](https://iuclid6.echa.europa.eu/public-api)and allows users to quickly run an updated report without re-uploading the report into the IUCLID Report Manager, and supports starting report generation
 from multiple datasets and dossiers.
 
 
@@ -18,11 +18,11 @@ from multiple datasets and dossiers.
 To use and run the report generator  Bash script, you will need:
 
 - IUCLID 6 installed from version v5.15.0 onwards (both Desktop and Server versions can be used)
-- If using Windows [Git Bash](https://gitforwindows.org/) terminal installed on your local machine
+- If using Windows you will need a [Git Bash](https://gitforwindows.org/) terminal installed on your local machine
 - If using Linux or Mac you need to install the GNU Zip and GIT utilities into your system and use the provided Terminal application
 - A working FTL report template uploaded into the IUCLID report manager
 
-## Download and Setup
+## Setup of the script
 
 Open your terminal from the folder you want the tool to be installed, e.g., C:\Users\<username>\Documents\workspace. In Windows you can right-click on top of the folder and select Git Bash Here.
 
