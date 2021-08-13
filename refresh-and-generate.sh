@@ -1,7 +1,7 @@
 #!/bin/bash
 
 CHECK_SERVER_HEALTH () {
-    RF_TEST=$(curl -s --location --request GET $RF_SERVER/iuclid6-ext/api/sys/health)
+    RF_TEST=$(curl -s --location --insecure --request GET $RF_SERVER/iuclid6-ext/api/sys/health)
     if [[ $RF_TEST == *"\"healthy\":true"* ]];
     then
         echo "Connected to $RF_SERVER"
@@ -24,7 +24,7 @@ then
     exit 1
 else
     set -o allexport
-    source $1
+    source "$1"
     set +o allexport
 fi
 
@@ -85,7 +85,7 @@ CREATE_REPORT () {
 
     echo -e "Generating report for ${RF_RED}$i${RF_NC} and storing it in $RF_REPORT_FILENAME"
     RF_OLD_REPORT=$(cat "$RF_REPORT_FILENAME")
-    curl -s --location --request GET ${RF_GENERATE_URL} \
+    curl -s --location --insecure --request GET ${RF_GENERATE_URL} \
     --header "IUCLID6-USER: ${RF_USERNAME}" \
     --header "IUCLID6-PASS: ${RF_PASSWORD}" \
     --header "Accept: ${RF_ACCEPT_CONTENT}" \
@@ -138,7 +138,7 @@ REFRESH_TEMPLATE () {
     RF_REFRESH_URL=$RF_SERVER/iuclid6-ext/api/ext/v1/reports?id=$RF_REPORT_ID
     RF_REPORT_URL=$RF_SERVER/iuclid6-web/reports/$RF_REPORT_NAME/$RF_REPORT_ID
     echo -e "Refreshing ${RF_RED}$RF_REPORT_NAME${RF_NC} $RF_REPORT_URL"
-    curl -s --location --request POST $RF_REFRESH_URL \
+    curl -s --location --insecure --request POST $RF_REFRESH_URL \
     --header 'Content-Type: application/vnd.iuclid6.report' \
     --header 'Accept: application/json, text/plain, */*' \
     --header "report: ${RF_REPORT_ID}" \
