@@ -153,3 +153,13 @@ Here is an example of the command line when opening the  Bash command line from 
 
 
 
+## Run and generate reports for several .env files
+
+A different script let's you run all refresh-and-generate script with all the .env files in a directory
+
+```
+./multiple-refresh-genearation.sh <path to .envs folder>
+```
+
+The script accepts the following parameters:
+1. `<path to .envs folder>` It can be set to any path, e.g., '`./envs/`' for a subfolder in this repo called 'envs'. Wrap the path around `"` if the path contains spaces.
