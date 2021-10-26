@@ -30,7 +30,7 @@ Open your terminal from the folder you want the tool to be installed, e.g., C:\U
 
 In the terminal type
 ```
-git clone https://github.com/Mark-R-R/automatic_report_generation_scripts.git
+git clone https://github.com/echa-ecm/automatic_report_generation_scripts.git
 ```
 
 ![Screenshot of Terminal with clone command](/doc/img/git-clone.png)
