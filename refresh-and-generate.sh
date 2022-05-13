@@ -1,7 +1,7 @@
 #!/bin/bash
 
 CHECK_SERVER_HEALTH () {
-    RF_TEST=$(curl -s --location --request GET $RF_SERVER/iuclid6-ext/api/sys/health)
+    RF_TEST=$(curl -s --location --insecure --request GET $RF_SERVER/iuclid6-ext/api/sys/health)
     if [[ $RF_TEST == *"\"healthy\":true"* ]];
     then
         echo "Connected to $RF_SERVER"
@@ -9,6 +9,32 @@ CHECK_SERVER_HEALTH () {
         echo "The IUCLID server at $RF_SERVER seems to be down. You need to start the server or define the RF_SERVER variable in your configuration."
         exit 1
     fi
+}
+
+SET_AUTHENTICATION () {
+    # As depending on the auth method we need to pass different number and types of headers to curl
+    # we put the headers in an array and explode them using "${RF_AUTH[@]/#/-H}"resulting in
+    # -HIUCLID6-USER: xxxx -HIUCLID6PASS: yyy which bash and curl understand. See https://stackoverflow.com/questions/28705723/
+    RF_AUTH=() #empty arrray of auth headers
+    RF_AUTH[0]="IUCLID6-USER: ${RF_USERNAME}"
+    RF_AUTH[1]="IUCLID6-PASS: ${RF_PASSWORD}"
+}
+RAWURLENCODE() {
+    local string="${1}"
+    local strlen=${#string}
+    local encoded=""
+    local pos c o
+
+    for (( pos=0 ; pos<strlen ; pos++ )); do
+        c=${string:$pos:1}
+        case "$c" in
+           [-_.~a-zA-Z0-9] ) o="${c}" ;;
+           * )               printf -v o '%%%02x' "'$c"
+        esac
+        encoded+="${o}"
+    done
+    echo "${encoded}"    # You can either set a return variable (FASTER)
+    REPLY="${encoded}"   #+or echo the result (EASIER)... or both... :p
 }
 
 CREATE_SCRIPT_FOLDERS () {
@@ -24,7 +50,7 @@ then
     exit 1
 else
     set -o allexport
-    source $1
+    source "$1" || exit 1
     set +o allexport
 fi
 
@@ -51,6 +77,7 @@ do
 
 done
 
+SET_AUTHENTICATION
 
 if [ "$RF_REPORT_OUTPUT" = "HTML" ];
 then
@@ -59,7 +86,7 @@ then
 elif [ "$RF_REPORT_OUTPUT" = "PDF" ];
 then
     RF_REPORT_EXTENSION=pdf
-    RF_ACCEPT_CONTENT="application/vnd.iuclid6.ext+pdf;type=database~$RF_REPORT_ID.$RF_STYLES"
+    RF_ACCEPT_CONTENT="application/vnd.iuclid6.ext+pdf;type=\"dbreport_$RF_REPORT_NAME.$RF_STYLES\""
 elif [ "$RF_REPORT_OUTPUT" = "CSV" ];
 then
     RF_REPORT_EXTENSION=csv
@@ -67,7 +94,7 @@ then
 elif [ "$RF_REPORT_OUTPUT" = "RTF" ];
 then
     RF_REPORT_EXTENSION=rtf
-    RF_ACCEPT_CONTENT="application/vnd.iuclid6.ext+rtf;type=database~$RF_REPORT_ID.$RF_STYLES"
+    RF_ACCEPT_CONTENT="application/vnd.iuclid6.ext+rtf;type=\"dbreport_$RF_REPORT_NAME.$RF_STYLES\""
 elif [ "$RF_REPORT_OUTPUT" = "XML" ];
 then
     RF_REPORT_EXTENSION=xml
@@ -82,12 +109,33 @@ JOIN_BY () {
 
 CREATE_REPORT () {
     RF_REPORT_FILENAME="$RF_OUTPUT_PATH/$RF_REPORT_NAME-$i.$RF_REPORT_EXTENSION"
+    RF_DATA="{}"
+    echo -e "Generating report for ${RF_RED}$i${RF_NC} and storing it in $RF_REPORT_FILENAME"
+    RF_OLD_REPORT=$(cat "$RF_REPORT_FILENAME")
+    curl -s --location --insecure --request POST "${RF_GENERATE_URL}" \
+    --data ${RF_DATA}\
+    "${RF_AUTH[@]/#/-H}" \
+    --header "Accept: ${RF_ACCEPT_CONTENT}" \
+    --header 'Content-Type: application/vnd.iuclid6.ext+json;type=web.CreateDossier' \
+    > "$RF_REPORT_FILENAME"
+
+    RF_DIFF_ARGS="--new-file  --report-identical-files --strip-trailing-cr --ignore-blank-lines --ignore-trailing-space --ignore-space-change --suppress-blank-empty"
+    if [ "$RF_DIFF" = true ];
+    then
+        echo "$RF_OLD_REPORT" | diff - "$RF_REPORT_FILENAME" --side-by-side --suppress-common-lines --width=180 --color $RF_DIFF_ARGS
+    else
+        echo "$RF_OLD_REPORT" | diff - "$RF_REPORT_FILENAME" --brief $RF_DIFF_ARGS
+    fi
+    echo -e "\n"
+}
+
+CREATE_REPORT_DOSSIER () {
+    RF_REPORT_FILENAME="$RF_OUTPUT_PATH/$RF_REPORT_NAME-$i.$RF_REPORT_EXTENSION"
 
     echo -e "Generating report for ${RF_RED}$i${RF_NC} and storing it in $RF_REPORT_FILENAME"
     RF_OLD_REPORT=$(cat "$RF_REPORT_FILENAME")
-    curl -s --location --request GET ${RF_GENERATE_URL} \
-    --header "IUCLID6-USER: ${RF_USERNAME}" \
-    --header "IUCLID6-PASS: ${RF_PASSWORD}" \
+    curl -s --location --insecure --request GET "${RF_GENERATE_URL}" \
+    "${RF_AUTH[@]/#/-H}" \
     --header "Accept: ${RF_ACCEPT_CONTENT}" \
     > "$RF_REPORT_FILENAME"
 
@@ -132,18 +180,16 @@ REFRESH_TEMPLATE () {
     else
         RF_ZIP_COMMAND="zip"
     fi
-    echo $RF_ZIP_COMMAND
-    (cd "$RF_TEMP_PATH" && "$RF_ZIP_COMMAND" -r -q "package.zip" ./*)
 
+    (cd "$RF_TEMP_PATH" && "$RF_ZIP_COMMAND" -r -q "package.zip" ./*)
     RF_REFRESH_URL=$RF_SERVER/iuclid6-ext/api/ext/v1/reports?id=$RF_REPORT_ID
     RF_REPORT_URL=$RF_SERVER/iuclid6-web/reports/$RF_REPORT_NAME/$RF_REPORT_ID
     echo -e "Refreshing ${RF_RED}$RF_REPORT_NAME${RF_NC} $RF_REPORT_URL"
-    curl -s --location --request POST $RF_REFRESH_URL \
+    curl -s --location --insecure --request POST $RF_REFRESH_URL \
     --header 'Content-Type: application/vnd.iuclid6.report' \
     --header 'Accept: application/json, text/plain, */*' \
     --header "report: ${RF_REPORT_ID}" \
-    --header "IUCLID6-USER: ${RF_USERNAME}" \
-    --header "IUCLID6-PASS: ${RF_PASSWORD}" \
+    "${RF_AUTH[@]/#/-H}" \
     --data-binary "@${RF_REPORT_ZIP_PATH}"
     echo -e "\n\n"
 }
@@ -153,33 +199,36 @@ then
     REFRESH_TEMPLATE
 fi
 
+RF_URL_NAME=$(RAWURLENCODE "$RF_REPORT_NAME")
+
 for i in "${RF_DOSSIERS[@]}";
 do
-    RF_GENERATE_URL=$RF_SERVER/iuclid6-ext/api/ext/v1/dossier/$i?template=database~$RF_REPORT_ID.$RF_MAIN_FTL
-    CREATE_REPORT
+    RF_GENERATE_URL=$RF_SERVER/iuclid6-ext/api/ext/v1/dossier/$i?template=dbreport_$RF_URL_NAME.$RF_MAIN_FTL
+    CREATE_REPORT_DOSSIER
 done
 
 for i in "${RF_MIXTURES[@]}";
 do
-    RF_GENERATE_URL=$RF_SERVER/iuclid6-ext/api/ext/v1/raw/MIXTURE/$i?template=database~$RF_REPORT_ID.$RF_MAIN_FTL
+    echo $RF_URL_NAME
+    RF_GENERATE_URL=$RF_SERVER/iuclid6-ext/api/ext/v1/raw/MIXTURE/$i/dossiers/COMPLETE/print?template=dbreport_$RF_URL_NAME.$RF_MAIN_FTL\&lang=default
     CREATE_REPORT
 done
 
 for i in "${RF_SUBSTANCES[@]}";
 do
-    RF_GENERATE_URL=$RF_SERVER/iuclid6-ext/api/ext/v1/raw/SUBSTANCE/$i?template=database~$RF_REPORT_ID.$RF_MAIN_FTL
+    RF_GENERATE_URL=$RF_SERVER/iuclid6-ext/api/ext/v1/raw/SUBSTANCE/$i/dossiers/COMPLETE/print?template=dbreport_$RF_URL_NAME.$RF_MAIN_FTL\&lang=default
     CREATE_REPORT
 done
 
 for i in "${RF_ARTICLES[@]}";
 do
-    RF_GENERATE_URL=$RF_SERVER/iuclid6-ext/api/ext/v1/raw/ARTICLE/$i?template=database~$RF_REPORT_ID.$RF_MAIN_FTL
+    RF_GENERATE_URL=$RF_SERVER/iuclid6-ext/api/ext/v1/raw/ARTICLE/$i/dossiers/COMPLETE/print?template=dbreport_$RF_URL_NAME.$RF_MAIN_FTL\&lang=default
     CREATE_REPORT
 done
 
 for i in "${RF_CATEGORIES[@]}";
 do
-    RF_GENERATE_URL=$RF_SERVER/iuclid6-ext/api/ext/v1/raw/CATEGORY/$i?template=database~$RF_REPORT_ID.$RF_MAIN_FTL
+    RF_GENERATE_URL=$RF_SERVER/iuclid6-ext/api/ext/v1/raw/CATEGORY/$i/dossiers/COMPLETE/print?template=dbreport_$RF_URL_NAME.$RF_MAIN_FTL\&lang=default
     CREATE_REPORT
 done
 
