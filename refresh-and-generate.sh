@@ -112,7 +112,7 @@ CREATE_REPORT () {
     RF_DATA="{}"
     echo -e "Generating report for ${RF_RED}$i${RF_NC} and storing it in $RF_REPORT_FILENAME"
     RF_OLD_REPORT=$(cat "$RF_REPORT_FILENAME")
-    curl -s --location --verbose --insecure --request POST "${RF_GENERATE_URL}" \
+    curl -s --location --insecure --request POST "${RF_GENERATE_URL}" \
     --data ${RF_DATA}\
     "${RF_AUTH[@]/#/-H}" \
     --header "Accept: ${RF_ACCEPT_CONTENT}" \
@@ -134,7 +134,7 @@ CREATE_REPORT_DOSSIER () {
 
     echo -e "Generating report for ${RF_RED}$i${RF_NC} and storing it in $RF_REPORT_FILENAME"
     RF_OLD_REPORT=$(cat "$RF_REPORT_FILENAME")
-    curl -s --location --verbose --insecure --request GET "${RF_GENERATE_URL}" \
+    curl -s --location --insecure --request GET "${RF_GENERATE_URL}" \
     "${RF_AUTH[@]/#/-H}" \
     --header "Accept: ${RF_ACCEPT_CONTENT}" \
     > "$RF_REPORT_FILENAME"
