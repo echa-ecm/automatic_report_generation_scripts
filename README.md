@@ -32,15 +32,7 @@ In the terminal type
 ```
 git clone https://github.com/echa-ecm/automatic_report_generation_scripts.git
 ```
-
-
-If you are running an older IUCLID versions, you may checkout a previous version compatible with v5.15.5 - v6.8.0.
-```
-git clone https://github.com/echa-ecm/automatic_report_generation_scripts.git
-cd automatic report_generation_scripts.git
-git checkout 51dddb79b
-```
-
+If you have a IUCLID version older than v6.14.3 but at least v5.15.5 you may clone a [previous version](https://github.com/echa-ecm/automatic_report_generation_scripts)
 
 ![Screenshot of Terminal with clone command](/doc/img/git-clone.png)
 
