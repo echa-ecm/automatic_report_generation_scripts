@@ -1,7 +1,7 @@
 # Manual for installing and using the IUCLID Report Generator v2 Bash script
 
 ## Background
-To further support IUCLID report builders, a Bash script is now available to generate reports quicker and more efficiently. Below is a guide on how to set up and use the script.
+To further support IUCLID report builders, a Bash script is now available to generate reports quicker and more efficiently. Below is a guide on how to set up and use the script using 6.14.3 of IUCLID or later.
 
 The IUCLID user interface provides a Report Manager to upload your own custom FTL report template and a Report Generator to generate a custom report from a single dataset or dossier.
 For IUCLID users who build FTL report templates, the user interface has two limitations:
@@ -15,7 +15,7 @@ from multiple datasets and dossiers.
 
 
 ## Requirements
-To use and run the report generator   Bash script, you will need:
+To use and run the report generator Bash script, you will need:
 
 - IUCLID 6 installed from version v6.14.3 onwards (both Desktop and Server versions can be used). See next section for installing v1 of the script that supports IUCLID 6 v5.15.0 to v6.8.0.
 - If using Windows you will need a [Git Bash](https://gitforwindows.org/) terminal installed on your local machine
@@ -35,6 +35,8 @@ git clone https://github.com/echa-ecm/automatic_report_generation_scripts.git
 If you have a IUCLID version older than v6.14.3 but at least v5.15.5 you may clone a [previous version](https://github.com/echa-ecm/automatic_report_generation_scripts)
 
 ![Screenshot of Terminal with clone command](/doc/img/git-clone.png)
+
+If you have a IUCLID version older than v6.14.3 but at least v5.15.5 you may clone a [previous version](https://github.com/echa-ecm/automatic_report_generation_scripts)
 
 The tool is composed of two main files:
 * The main script file refresh-and-generate.sh
